@@ -1,4 +1,5 @@
 use std::{fs, env};
+use std::io::Write;
 use std::path::{Path, PathBuf};
 use metaflac::Tag;
 
@@ -10,17 +11,23 @@ fn main() {
 
     let (key, val) = prepare_tag_arg(&args[2]);
 
-
     let mut flacs: Vec<PathBuf> = Vec::new();
 
     get_flacs(music_dir, &mut flacs);
 
+    let mut file = fs::OpenOptions::new()
+        .write(true)
+        .truncate(true)
+        .create(true)
+        .open("./playlist.m3u").unwrap();
+
     for flac in flacs.iter() {
     
         let tag = get_flac_tag(flac, &key.to_uppercase());
-        
+
         if tag == val {
-            println!("{:?}", flac);
+            file.write(flac.to_str().unwrap().as_bytes()).expect("unable to write data");
+            file.write("\n".as_bytes()).expect("unable to write data");
         }
 
     }
@@ -28,7 +35,6 @@ fn main() {
 }
 
 fn get_flacs(dir: &Path, buffer: &mut Vec<PathBuf>) {
-
 
     let top_level_dir = match fs::read_dir(dir) {
     
