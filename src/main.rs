@@ -63,7 +63,7 @@ fn get_flacs(dir: &Path, buffer: &mut Vec<PathBuf>) {
     }
 }
 
-fn check_flac_tag(path_to_flac: &Path, tag_to_get: &str) -> String {
+fn get_flac_tag(path_to_flac: &Path, tag_to_get: &str) -> String {
 
     let tag = Tag::read_from_path(path_to_flac).unwrap();
     let comments = tag.vorbis_comments().unwrap();
