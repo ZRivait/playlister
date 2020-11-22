@@ -1,24 +1,30 @@
-use std::fs;
+use std::{fs, env};
 use std::path::{Path, PathBuf};
 use metaflac::Tag;
 
 fn main() {
 
+    let args: Vec<String> = env::args().collect();
     
+    let music_dir = Path::new(&args[1]);
+
+    let (key, val) = prepare_tag_arg(&args[2]);
+
+
     let mut flacs: Vec<PathBuf> = Vec::new();
 
-    get_flacs(Path::new("/media/hibiki/Music"), &mut flacs);
+    get_flacs(music_dir, &mut flacs);
 
     for flac in flacs.iter() {
     
-        let tag = get_flac_tag(flac, "RATING");
+        let tag = get_flac_tag(flac, &key.to_uppercase());
         
-        if tag == "5" {
+        if tag == val {
             println!("{:?}", flac);
         }
 
     }
-
+    
 }
 
 fn get_flacs(dir: &Path, buffer: &mut Vec<PathBuf>) {
@@ -74,4 +80,20 @@ fn get_flac_tag(path_to_flac: &Path, tag_to_get: &str) -> String {
         None => String::from("")
 
     }
+}
+
+fn prepare_tag_arg(arg: &String) -> (String, String) {
+
+    let index = match arg.find('='){
+
+        Some(x) => x,
+        None => panic!("malformed tag argument")
+
+    };
+
+    let mut key = arg.clone();
+    let mut val = key.split_off(index);
+    val = val.strip_prefix('=').unwrap().to_string();
+
+    (key, val)
 }
