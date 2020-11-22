@@ -1,14 +1,22 @@
 use std::fs;
 use std::path::{Path, PathBuf};
+use metaflac::Tag;
 
 fn main() {
 
+    
     let mut flacs: Vec<PathBuf> = Vec::new();
 
     get_flacs(Path::new("/media/hibiki/Music"), &mut flacs);
 
-    for x in flacs.iter() {
-        println!("{:?}", x);
+    for flac in flacs.iter() {
+    
+        let tag = get_flac_tag(flac, "RATING");
+        
+        if tag == "5" {
+            println!("{:?}", flac);
+        }
+
     }
 
 }
@@ -44,16 +52,26 @@ fn get_flacs(dir: &Path, buffer: &mut Vec<PathBuf>) {
             let is_flac = match path.extension() {
 
                 Some(x) => x == "flac",
-                None => _
+                None => false
 
             };
 
             if is_flac {
                 buffer.push(path);
             }
-
         }
+    }
+}
+
+fn check_flac_tag(path_to_flac: &Path, tag_to_get: &str) -> String {
+
+    let tag = Tag::read_from_path(path_to_flac).unwrap();
+    let comments = tag.vorbis_comments().unwrap();
+
+    match comments.get(tag_to_get) {
+        
+        Some(x) => x[0].clone(),
+        None => String::from("")
 
     }
-
 }
